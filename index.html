@@ -7,17 +7,39 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="hero">
+  <aside class="sidebar">
     <img src="go-k-haas.jpeg" alt="Go K-Haas Logo" class="logo" />
-    <h1>Go K-Haas Dashboard</h1>
-  </header>
-  <nav id="sheet-tabs" aria-label="Sheet Tabs"></nav>
-  <main>
-    <iframe id="sheet-frame" loading="lazy" title="Google Sheet View"></iframe>
+    <nav id="sidebar-nav"></nav>
+  </aside>
+
+  <main class="content">
+    <header class="hero">
+      <h1>Go K-Haas Dashboard</h1>
+    </header>
+
+    <section id="section-0" class="sheet-section">
+      <h2>Go K-Haas Championship Rankings</h2>
+      <iframe
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQe9flGCmYKhK51q9zW7UTqcsR8EYpcUpCq3ykPEmTz2BkCk4dp6nAXrQAbDdzVPz-GHYHj3hIFy6v5/pubhtml?gid=13107265&amp;single=true&amp;widget=true&amp;headers=false"
+        loading="lazy"
+        title="Rankings"
+      ></iframe>
+    </section>
+
+    <section id="section-1" class="sheet-section">
+      <h2>2025 Races</h2>
+      <iframe
+        src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQe9flGCmYKhK51q9zW7UTqcsR8EYpcUpCq3ykPEmTz2BkCk4dp6nAXrQAbDdzVPz-GHYHj3hIFy6v5/pubhtml?gid=1722176340&amp;single=true&amp;widget=true&amp;headers=false"
+        loading="lazy"
+        title="2025 Races"
+      ></iframe>
+    </section>
+
+    <footer>
+      <p>&copy; 2025 Go K-Haas Championship • Powered by Berkeley</p>
+    </footer>
   </main>
-  <footer>
-    <p>&copy; 2025 Go K-Haas Dashboard • Built with 🐻</p>
-  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
