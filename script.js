@@ -1,11 +1,11 @@
 const sheets = [
   {
-    name: "Sales",
-    url: "https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pubhtml?gid=0&single=true&widget=true&headers=false"
+    name: "Go K-Haas Championship Rankings",
+    url: "https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=13107265#gid=13107265"
   },
   {
-    name: "Marketing",
-    url: "https://docs.google.com/spreadsheets/d/e/YOUR_SHEET_ID/pubhtml?gid=123456&single=true&widget=true&headers=false"
+    name: "2025 Races",
+    url: "https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=1722176340#gid=1722176340"
   }
 ];
 
