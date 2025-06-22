@@ -5,14 +5,14 @@ const sheets = [
   {
     name: "Go K-Haas Championship Rankings",
     id: "section-0",
-    desktopUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQe9flGCmYKhK51q9zW7UTqcsR8EYpcUpCq3ykPEmTz2BkCk4dp6nAXrQAbDdzVPz-GHYHj3hIFy6v5/pubhtml?gid=13107265&single=true&widget=true&headers=false",
-    mobileUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQe9flGCmYKhK51q9zW7UTqcsR8EYpcUpCq3ykPEmTz2BkCk4dp6nAXrQAbDdzVPz-GHYHj3hIFy6v5/pubchart?oid=1916474073&format=interactive"
+    desktopUrl: "https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=13107265#gid=13107265",
+    mobileUrl: "https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=13107265#gid=13107265"
   },
   {
     name: "2025 Races",
     id: "section-1",
-    desktopUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQe9flGCmYKhK51q9zW7UTqcsR8EYpcUpCq3ykPEmTz2BkCk4dp6nAXrQAbDdzVPz-GHYHj3hIFy6v5/pubhtml?gid=1722176340&single=true&widget=true&headers=false",
-    mobileUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQe9flGCmYKhK51q9zW7UTqcsR8EYpcUpCq3ykPEmTz2BkCk4dp6nAXrQAbDdzVPz-GHYHj3hIFy6v5/pubchart?oid=1409643188&format=interactive"
+    desktopUrl: "https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=1722176340#gid=1722176340",
+    mobileUrl: "https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=1722176340#gid=1722176340"
   }
 ];
 
