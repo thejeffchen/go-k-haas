@@ -4,7 +4,7 @@ const raceList = document.getElementById("race-list");
 
 const navItems = [
   { name: "🏁 Ranking", id: "ranking" },
-  { name: "📄 Past Races", id: "races" },
+  { name: "⏱️ Past Races", id: "races" },
   { name: "📋 Points System", id: "scoring" }
 ];
 
