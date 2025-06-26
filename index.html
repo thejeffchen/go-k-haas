@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Go K-Haas Dashboard</title>
+  <title>Go K-Haas Championship</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,17 +14,36 @@
 
   <main class="content">
     <header class="hero">
-      <h1>Go K-Haas Dashboard</h1>
+      <h1>Berkeley Haas non-Official<br />Go K-Haas Championship</h1>
     </header>
 
-    <section id="section-0" class="sheet-section">
-      <h2>Go K-Haas Championship Rankings</h2>
-      <iframe src="https://docs.google.com/spreadsheets/d/1usgOG9yH74E98bKitpW1Yc3P3x6j0iqYvaNsLfEeWs4/edit?gid=13107265#gid=13107265" title="Rankings" loading="lazy"></iframe>
+    <section id="ranking" class="sheet-section">
+      <h2>2025 Q3/Q4 Season</h2>
+      <div id="ranking-list"></div>
     </section>
 
-    <section id="section-1" class="sheet-section">
-      <h2>2025 Races</h2>
+    <section id="races" class="sheet-section">
+      <h2>Past Races</h2>
       <div id="race-list"></div>
+    </section>
+
+    <section id="scoring" class="sheet-section">
+      <h2>🏁 Scoring System</h2>
+      <table>
+        <thead>
+          <tr><th>Position</th><th>Points</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1st place</td><td>18 points</td></tr>
+          <tr><td>2nd place</td><td>12 points</td></tr>
+          <tr><td>3rd place</td><td>10 points</td></tr>
+          <tr><td>4th place</td><td>8 points</td></tr>
+          <tr><td>5th place</td><td>6 points</td></tr>
+          <tr><td>6th place</td><td>4 points</td></tr>
+          <tr><td>7th place</td><td>2 points</td></tr>
+        </tbody>
+      </table>
+      <p><em>Additional Haas-style bonuses may apply at organizer's discretion 🏆</em></p>
     </section>
 
     <footer>
