@@ -1,109 +1,94 @@
-const SHEET_ID = "1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY";
-const RAW_GID = "0";
-const RANKING_GID = "157995054";
+const sidebarNav = document.getElementById("sidebar-nav");
+const rankingList = document.getElementById("ranking-list");
+const raceList = document.getElementById("race-list");
 
-// Sidebar Navigation
-const nav = document.getElementById("sidebar-nav");
-const sections = [
-  { id: "ranking", name: "🏁 Ranking" },
-  { id: "races", name: "🗓️ Past Races" },
-  { id: "points", name: "📋 Points System" },
+const navItems = [
+  { name: "🏁 Ranking", id: "ranking" },
+  { name: "📄 Past Races", id: "races" },
+  { name: "📋 Points System", id: "scoring" }
 ];
-sections.forEach(({ id, name }) => {
-  const btn = document.createElement("button");
-  btn.textContent = name;
-  btn.onclick = () => document.getElementById(id).scrollIntoView({ behavior: "smooth" });
-  nav.appendChild(btn);
+
+navItems.forEach(({ name, id }) => {
+  const link = document.createElement("button");
+  link.textContent = name;
+  link.onclick = () => document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+  sidebarNav.appendChild(link);
 });
 
-// Load and Render
-async function loadData() {
-  const [raw, ranking] = await Promise.all([
-    fetchCSV(RAW_GID),
-    fetchCSV(RANKING_GID),
-  ]);
+// URLs to public JSON exports
+const RANKING_URL = "https://opensheet.elk.sh/1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY/Overall%20Ranking";
+const RACES_URL = "https://opensheet.elk.sh/1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY/Inputs";
 
-  renderRankings(ranking);
-  renderRaces(raw);
-}
-loadData();
-
-function fetchCSV(gid) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-  return fetch(url)
-    .then(r => r.text())
-    .then(parseCSV);
+// Helpers
+function getInitials(name) {
+  return name.split(" ").map(w => w[0].toUpperCase()).join("").slice(0, 2);
 }
 
-function parseCSV(csv) {
-  const [headers, ...rows] = csv.trim().split("\n").map(r => r.split(","));
-  return rows.map(row => {
-    const obj = {};
-    headers.forEach((h, i) => obj[h.trim()] = row[i]?.trim());
-    return obj;
-  });
-}
-
-function renderRankings(data) {
-  const container = document.getElementById("ranking");
-  const list = document.createElement("div");
-  list.className = "ranking-list";
-
-  data.forEach((row, index) => {
-    const name = row["Racer"] || row["Name"];
-    const points = row["Points"] || row["Total Points"] || row["sum"] || row["sum Points"];
-    const initials = name.split(" ").map(n => n[0]).join("").toUpperCase();
-
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="avatar">${initials}</div>
-      <div class="info">
-        <strong>#${index + 1} - ${name}</strong>
-        <span>Class of 2026 • ${points || "0"} pts</span>
-      </div>
-    `;
-    list.appendChild(card);
+// === Render Ranking ===
+fetch(RANKING_URL)
+  .then(res => res.json())
+  .then(data => {
+    data.forEach((racer, idx) => {
+      const card = document.createElement("div");
+      card.className = "ranking-card";
+      const initials = getInitials(racer["Racer"] || "");
+      card.innerHTML = `
+        <div class="avatar" style="background-color: ${generateColor(initials)}">${initials}</div>
+        <div class="info">
+          <strong>#${idx + 1} - ${racer["Racer"]}</strong>
+          <p>Class of 2026 • ${racer["Points"] || 0} pts</p>
+        </div>
+      `;
+      rankingList.appendChild(card);
+    });
   });
 
-  container.appendChild(list);
-}
+// === Render Past Races ===
+fetch(RACES_URL)
+  .then(res => res.json())
+  .then(rows => {
+    // Group by round + track
+    const grouped = {};
+    rows.forEach(row => {
+      const round = row["Round"] || "Unknown";
+      const track = row["Track"] || "Unknown";
+      const key = `${round}||${track}`;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(row);
+    });
 
-function renderRaces(data) {
-  const container = document.getElementById("races");
-  const grouped = {};
+    Object.entries(grouped).forEach(([key, racers]) => {
+      const [round, track] = key.split("||");
+      const dateStr = racers[0]["Date"];
+      const address = racers[0]["Address"];
+      const date = new Date(dateStr);
+      const readableDate = isNaN(date) ? "Invalid Date" : date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-  data.forEach(row => {
-    const key = `${row.Track}||${row.Round}`;
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(row);
+      const container = document.createElement("div");
+      container.className = "race-card";
+      container.innerHTML = `
+        <strong>${readableDate} – ${track} (Race ${round})</strong>
+        <p>📍 ${address}</p>
+        <ul class="race-placements"></ul>
+      `;
+
+      const ul = container.querySelector(".race-placements");
+      racers
+        .sort((a, b) => Number(a.Position) - Number(b.Position))
+        .forEach(r => {
+          const li = document.createElement("li");
+          li.textContent = `#${r.Position} – ${r.Racer} (${r.Points} pts, ${r["Best Time"]}s best lap)`;
+          ul.appendChild(li);
+        });
+
+      raceList.appendChild(container);
+    });
   });
 
-  Object.entries(grouped).forEach(([key, rows]) => {
-    const [track, round] = key.split("||");
-    const sorted = rows.sort((a, b) => parseInt(a.Position) - parseInt(b.Position));
-
-    // Format date safely
-    let dateStr = sorted[0].Date;
-    if (!isNaN(Date.parse(dateStr))) {
-      dateStr = new Date(dateStr).toLocaleDateString("en-US", { month: "long", day: "numeric" });
-    } else {
-      dateStr = "Invalid Date";
-    }
-
-    // Get best time
-    const bestTime = Math.min(...sorted.map(r => parseFloat(r["Best Time"] || r["BestTime"] || r["Best time"]))).toFixed(3);
-
-    const block = document.createElement("div");
-    block.className = "race-block";
-    block.innerHTML = `
-      <h3>${dateStr} – ${track} (Race ${round})</h3>
-      <p>📍 ${sorted[0].Address}</p>
-      <p>⏱️ Fastest Lap: ${bestTime}s</p>
-      <ul>
-        ${sorted.map(r => `<li>#${r.Position} – ${r.Racer} (${r.Points} pts)</li>`).join("")}
-      </ul>
-    `;
-    container.appendChild(block);
-  });
+// === Color generator from initials ===
+function generateColor(seed) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  const h = hash % 360;
+  return `hsl(${h}, 60%, 70%)`;
 }
