@@ -101,5 +101,6 @@ fetch(RACES_URL)
 
       container.appendChild(table);
       raceList.appendChild(container);
+      details.open = true
     });
   });
