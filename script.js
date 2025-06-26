@@ -1,89 +1,109 @@
+const SHEET_ID = "1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY";
+const RAW_GID = "0";
+const RANKING_GID = "157995054";
+
+// Sidebar Navigation
 const nav = document.getElementById("sidebar-nav");
 const sections = [
-  { name: "🏁 Ranking", id: "ranking" },
-  { name: "📅 Past Races", id: "races" },
-  { name: "📋 Points System", id: "scoring" },
+  { id: "ranking", name: "🏁 Ranking" },
+  { id: "races", name: "🗓️ Past Races" },
+  { id: "points", name: "📋 Points System" },
 ];
-
-sections.forEach(({ name, id }) => {
-  const button = document.createElement("button");
-  button.textContent = name;
-  button.onclick = () => {
-    document.getElementById(id).scrollIntoView({ behavior: "smooth" });
-  };
-  nav.appendChild(button);
+sections.forEach(({ id, name }) => {
+  const btn = document.createElement("button");
+  btn.textContent = name;
+  btn.onclick = () => document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+  nav.appendChild(btn);
 });
 
-const RANKINGS_URL = "https://docs.google.com/spreadsheets/d/1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY/gviz/tq?tqx=out:json&gid=157995054";
-const RACES_URL = "https://docs.google.com/spreadsheets/d/1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY/gviz/tq?tqx=out:json&gid=0";
+// Load and Render
+async function loadData() {
+  const [raw, ranking] = await Promise.all([
+    fetchCSV(RAW_GID),
+    fetchCSV(RANKING_GID),
+  ]);
 
-function fetchSheet(url) {
+  renderRankings(ranking);
+  renderRaces(raw);
+}
+loadData();
+
+function fetchCSV(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
   return fetch(url)
-    .then(res => res.text())
-    .then(text => JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*)\)/s)[1]))
-    .then(json => {
-      return json.table.rows.map(row => {
-        return json.table.cols.reduce((obj, col, i) => {
-          obj[col.label] = row.c[i] ? row.c[i].v : "";
-          return obj;
-        }, {});
-      });
-    });
+    .then(r => r.text())
+    .then(parseCSV);
+}
+
+function parseCSV(csv) {
+  const [headers, ...rows] = csv.trim().split("\n").map(r => r.split(","));
+  return rows.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h.trim()] = row[i]?.trim());
+    return obj;
+  });
 }
 
 function renderRankings(data) {
-  const container = document.getElementById("ranking-list");
-  container.innerHTML = "";
+  const container = document.getElementById("ranking");
+  const list = document.createElement("div");
+  list.className = "ranking-list";
 
-  data.forEach(({ Racer, Points }, index) => {
+  data.forEach((row, index) => {
+    const name = row["Racer"] || row["Name"];
+    const points = row["Points"] || row["Total Points"] || row["sum"] || row["sum Points"];
+    const initials = name.split(" ").map(n => n[0]).join("").toUpperCase();
+
     const card = document.createElement("div");
-    card.className = "ranking-card";
-
-    const img = document.createElement("img");
-    img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(Racer)}&background=random`;
-
-    const text = document.createElement("div");
-    text.innerHTML = `<strong>#${index + 1} - ${Racer}</strong><span>Class of 2026 • ${Points} pts</span>`;
-
-    card.appendChild(img);
-    card.appendChild(text);
-    container.appendChild(card);
+    card.className = "card";
+    card.innerHTML = `
+      <div class="avatar">${initials}</div>
+      <div class="info">
+        <strong>#${index + 1} - ${name}</strong>
+        <span>Class of 2026 • ${points || "0"} pts</span>
+      </div>
+    `;
+    list.appendChild(card);
   });
+
+  container.appendChild(list);
 }
 
 function renderRaces(data) {
+  const container = document.getElementById("races");
   const grouped = {};
-  data.forEach(r => {
-    const key = `${r.Track}||${r.Round}`;
+
+  data.forEach(row => {
+    const key = `${row.Track}||${row.Round}`;
     if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(r);
+    grouped[key].push(row);
   });
 
-  const container = document.getElementById("race-list");
-  container.innerHTML = "";
-
-  Object.entries(grouped).forEach(([key, racers]) => {
+  Object.entries(grouped).forEach(([key, rows]) => {
     const [track, round] = key.split("||");
-    const sorted = racers.sort((a, b) => Number(a.Position) - Number(b.Position));
-    const dateStr = new Date(sorted[0].Date).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+    const sorted = rows.sort((a, b) => parseInt(a.Position) - parseInt(b.Position));
+
+    // Format date safely
+    let dateStr = sorted[0].Date;
+    if (!isNaN(Date.parse(dateStr))) {
+      dateStr = new Date(dateStr).toLocaleDateString("en-US", { month: "long", day: "numeric" });
+    } else {
+      dateStr = "Invalid Date";
+    }
+
+    // Get best time
+    const bestTime = Math.min(...sorted.map(r => parseFloat(r["Best Time"] || r["BestTime"] || r["Best time"]))).toFixed(3);
 
     const block = document.createElement("div");
     block.className = "race-block";
-    block.innerHTML = `<h3>${dateStr} - ${track} (Race ${round})</h3><p>📍 ${sorted[0].Address}</p>`;
-
-    const list = document.createElement("ul");
-    sorted.forEach(r => {
-      const li = document.createElement("li");
-      li.textContent = `#${r.Position} - ${r.Racer} (${r.Points} pts)`;
-      list.appendChild(li);
-    });
-    block.appendChild(list);
+    block.innerHTML = `
+      <h3>${dateStr} – ${track} (Race ${round})</h3>
+      <p>📍 ${sorted[0].Address}</p>
+      <p>⏱️ Fastest Lap: ${bestTime}s</p>
+      <ul>
+        ${sorted.map(r => `<li>#${r.Position} – ${r.Racer} (${r.Points} pts)</li>`).join("")}
+      </ul>
+    `;
     container.appendChild(block);
   });
 }
-
-Promise.all([fetchSheet(RANKINGS_URL), fetchSheet(RACES_URL)])
-  .then(([rankingData, raceData]) => {
-    renderRankings(rankingData);
-    renderRaces(raceData);
-  });
