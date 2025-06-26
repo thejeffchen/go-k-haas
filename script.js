@@ -19,9 +19,15 @@ navItems.forEach(({ name, id }) => {
 const RANKING_URL = "https://opensheet.elk.sh/1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY/Overall%20Ranking";
 const RACES_URL = "https://opensheet.elk.sh/1ysbEyCrDhlnleTdzWADT1Lr9ZEVP_ayKBMmaPNVKaeY/Inputs";
 
-// Helpers
 function getInitials(name) {
-  return name.split(" ").map(w => w[0].toUpperCase()).join("").slice(0, 2);
+  return name.split(" ").map(w => w[0]?.toUpperCase()).join("").slice(0, 2);
+}
+
+function generateColor(seed) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  const h = hash % 360;
+  return `hsl(${h}, 60%, 70%)`;
 }
 
 // === Render Ranking ===
@@ -47,7 +53,6 @@ fetch(RANKING_URL)
 fetch(RACES_URL)
   .then(res => res.json())
   .then(rows => {
-    // Group by round + track
     const grouped = {};
     rows.forEach(row => {
       const round = row["Round"] || "Unknown";
@@ -62,33 +67,39 @@ fetch(RACES_URL)
       const dateStr = racers[0]["Date"];
       const address = racers[0]["Address"];
       const date = new Date(dateStr);
-      const readableDate = isNaN(date) ? "Invalid Date" : date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const readableDate = isNaN(date) ? "Unknown Date" : date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-      const container = document.createElement("div");
-      container.className = "race-card";
-      container.innerHTML = `
-        <strong>${readableDate} – ${track} (Race ${round})</strong>
-        <p>📍 ${address}</p>
-        <ul class="race-placements"></ul>
+      const container = document.createElement("details");
+      container.className = "race-dropdown";
+
+      const summary = document.createElement("summary");
+      summary.innerHTML = `<strong>${readableDate} – ${track} (Race ${round})</strong><br/><small>📍 ${address}</small>`;
+      container.appendChild(summary);
+
+      const table = document.createElement("table");
+      table.className = "race-table";
+      table.innerHTML = `
+        <thead>
+          <tr><th>Position</th><th>Racer</th><th>Points</th><th>Best Lap (s)</th></tr>
+        </thead>
+        <tbody></tbody>
       `;
+      const tbody = table.querySelector("tbody");
 
-      const ul = container.querySelector(".race-placements");
       racers
         .sort((a, b) => Number(a.Position) - Number(b.Position))
         .forEach(r => {
-          const li = document.createElement("li");
-          li.textContent = `#${r.Position} – ${r.Racer} (${r.Points} pts, ${r["Best Time"]}s best lap)`;
-          ul.appendChild(li);
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>#${r.Position}</td>
+            <td>${r.Racer}</td>
+            <td>${r.Points}</td>
+            <td>${r["Best Time"]}s</td>
+          `;
+          tbody.appendChild(row);
         });
 
+      container.appendChild(table);
       raceList.appendChild(container);
     });
   });
-
-// === Color generator from initials ===
-function generateColor(seed) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-  const h = hash % 360;
-  return `hsl(${h}, 60%, 70%)`;
-}
