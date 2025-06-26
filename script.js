@@ -36,7 +36,7 @@ fetch(RANKING_URL)
         <div class="avatar" style="background-color: ${generateColor(initials)}">${initials}</div>
         <div class="info">
           <strong>#${idx + 1} - ${racer["Racer"]}</strong>
-          <p>Class of 2026 • ${racer["Points"] || 0} pts</p>
+          <p>Class of 2026 • ${racer["sum Points"] || 0} pts</p>
         </div>
       `;
       rankingList.appendChild(card);
